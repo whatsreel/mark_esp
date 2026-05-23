@@ -1,0 +1,33 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-error.log*
+.pnp/
+.pnp.js
+
+# Build output
+dist/
+_site/
+.jekyll-cache/
+.jekyll-metadata/
+.sass-cache/
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.env
+.env.local
+
+# OS
+Thumbs.db
+ehthumbs.db
+Desktop.ini
