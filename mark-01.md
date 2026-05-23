@@ -1,3 +1,8 @@
+---
+layout: default
+title: Mark 1
+---
+
 # Mark 1 — Greek / Spanish (NTV)
 
 Verse-by-verse alignment. Stacked layout (Greek above Spanish) so it reads cleanly on phone and desktop without horizontal scroll.

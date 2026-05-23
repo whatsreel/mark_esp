@@ -1,0 +1,55 @@
+name: Deploy
+
+on:
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+
+      - name: Build Jekyll
+        run: bundle exec jekyll build
+
+      - name: Install staticrypt
+        run: npm install -g staticrypt
+
+      - name: Encrypt HTML
+        env:
+          PASSWORD: ${{ secrets.STATICRYPT_PASSWORD }}
+        run: |
+          cp -r _site _encrypted
+          while IFS= read -r f; do
+            dir=$(dirname "$f")
+            staticrypt "$f" -p "$PASSWORD" -d "$dir" --short
+          done < <(find _encrypted -name "*.html")
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _encrypted
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/deploy-pages@v4
+        id: deployment

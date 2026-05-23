@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ page.title | default: site.title }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #faf9f7;
+      --text: #1a1a1a;
+      --muted: #777;
+      --accent: #7a6248;
+      --rule: #e0dbd4;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #181715;
+        --text: #e5e0d8;
+        --muted: #888;
+        --accent: #b09a7a;
+        --rule: #2e2c28;
+      }
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Noto Serif', Georgia, serif;
+      font-size: 1.15rem;
+      line-height: 1.9;
+      background: var(--bg);
+      color: var(--text);
+      padding: 2.5rem 1.4rem;
+      max-width: 40rem;
+      margin: 0 auto;
+    }
+    h1 {
+      font-size: 1.25rem;
+      font-weight: normal;
+      color: var(--accent);
+      margin-bottom: 2rem;
+      letter-spacing: 0.01em;
+    }
+    h2 {
+      font-size: 0.72rem;
+      font-weight: bold;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin: 2.75rem 0 0.9rem;
+    }
+    p { margin-bottom: 0.4rem; }
+    strong {
+      font-size: 0.68rem;
+      font-weight: bold;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-right: 0.45rem;
+      font-style: normal;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid var(--rule);
+      margin: 1.75rem 0 0;
+    }
+    nav {
+      margin-bottom: 2.75rem;
+      font-size: 0.85rem;
+    }
+    nav a {
+      color: var(--accent);
+      text-decoration: none;
+      margin-right: 1.25rem;
+    }
+    nav a:hover { text-decoration: underline; }
+    ul { list-style: none; padding: 0; }
+    ul li { margin-bottom: 0.6rem; }
+    ul li a { color: var(--accent); text-decoration: none; }
+    ul li a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  {{ content }}
+</body>
+</html>
