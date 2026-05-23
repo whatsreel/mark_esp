@@ -1,0 +1,1052 @@
+<!DOCTYPE html><!-- v3 -->
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marcos 1 — Word Study</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=Cinzel:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --parchment: #f5f0e8;
+    --ink: #1a1208;
+    --gold: #b8860b;
+    --rust: #8b3a0f;
+    --sage: #4a6741;
+    --blue: #2c4a7c;
+    --purple: #5c3472;
+    --border: #c8b99a;
+    --card-bg: #fffdf7;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--parchment);
+    color: var(--ink);
+    font-family: 'EB Garamond', Georgia, serif;
+    min-height: 100vh;
+    padding: 2rem 1rem;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: 
+      radial-gradient(ellipse at 20% 20%, rgba(184,134,11,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 80%, rgba(139,58,15,0.05) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 740px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 2px solid var(--border);
+  }
+
+  header h1 {
+    font-family: 'Cinzel', serif;
+    font-size: 2rem;
+    color: var(--rust);
+    letter-spacing: 0.08em;
+    margin-bottom: 0.3rem;
+  }
+
+  header p {
+    font-style: italic;
+    color: var(--gold);
+    font-size: 1rem;
+  }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-bottom: 2rem;
+    padding: 1rem 1.2rem;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.85rem;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .legend-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  .passage {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 2rem 2.5rem;
+    font-size: 1.25rem;
+    line-height: 2.2;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  }
+
+  .verse-num {
+    font-family: 'Cinzel', serif;
+    font-size: 0.72rem;
+    color: var(--gold);
+    vertical-align: super;
+    margin-right: 0.2rem;
+    font-weight: 600;
+  }
+
+  .word {
+    cursor: pointer;
+    border-radius: 3px;
+    padding: 1px 2px;
+    transition: background 0.15s, transform 0.1s;
+    display: inline;
+  }
+
+  .word:hover {
+    filter: brightness(0.85);
+    transform: translateY(-1px);
+  }
+
+  .word.active {
+    outline: 2px solid var(--gold);
+    outline-offset: 1px;
+  }
+
+  /* Color coding by part of speech */
+  .verb-present    { color: #1a6bbf; }                        /* strong royal blue */
+  .verb-preterite  { color: #c0392b; }                        /* clear red */
+  .verb-imperfect  { color: #d4880a; }                        /* amber/orange */
+  .verb-future     { color: #278a4a; }                        /* forest green */
+  .verb-imperative { color: #7b2fbf; }      /* vivid purple + bold */
+  .noun            { color: #2a2a2a; }
+  .proper-noun     { color: var(--ink); font-style: italic; }
+  .article         { color: #666; }
+  .pronoun         { color: #555; }
+  .preposition     { color: #777; }
+  .other           { color: var(--ink); }
+
+  /* Legend colors */
+  .dot-present    { background: #1a6bbf; }
+  .dot-preterite  { background: #c0392b; }
+  .dot-imperfect  { background: #d4880a; }
+  .dot-future     { background: #278a4a; }
+  .dot-imperative { background: #7b2fbf; }
+
+  /* Popup */
+  .popup-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+
+  .popup-overlay.visible {
+    display: flex;
+  }
+
+  .popup {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    max-width: 480px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.2);
+    animation: popIn 0.18s ease;
+  }
+
+  @keyframes popIn {
+    from { transform: scale(0.93) translateY(8px); opacity: 0; }
+    to   { transform: scale(1) translateY(0); opacity: 1; }
+  }
+
+  .popup-header {
+    padding: 1.2rem 1.5rem 0.8rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .popup-word {
+    font-family: 'Cinzel', serif;
+    font-size: 1.5rem;
+    color: var(--rust);
+  }
+
+  .popup-pos {
+    font-size: 0.8rem;
+    color: var(--gold);
+    font-style: italic;
+    margin-top: 0.2rem;
+  }
+
+  .close-btn {
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    cursor: pointer;
+    color: #999;
+    line-height: 1;
+    padding: 0 0.2rem;
+  }
+
+  .close-btn:hover { color: var(--rust); }
+
+  .popup-body {
+    padding: 1.2rem 1.5rem;
+  }
+
+  .popup-section {
+    margin-bottom: 1.2rem;
+  }
+
+  .popup-section h3 {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  .popup-section p {
+    font-size: 1rem;
+    line-height: 1.5;
+    color: var(--ink);
+  }
+
+  .conjugation-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+  }
+
+  .conjugation-table th {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+    color: var(--gold);
+    text-align: left;
+    padding: 0.3rem 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .conjugation-table td {
+    padding: 0.3rem 0.5rem;
+    border-bottom: 1px solid #ede5d5;
+  }
+
+  .conjugation-table tr.highlight td {
+    color: var(--rust);
+    font-weight: 600;
+  }
+
+  /* Chat panel */
+  .chat-panel {
+    margin-top: 2rem;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  }
+  .chat-header {
+    padding: 0.9rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    color: var(--gold);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .chat-clear {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.2rem 0.6rem;
+    font-family: 'EB Garamond', serif;
+    font-size: 0.8rem;
+    color: #aaa;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .chat-clear:hover { color: var(--rust); border-color: var(--rust); }
+  .chat-messages {
+    min-height: 60px;
+    max-height: 340px;
+    overflow-y: auto;
+    padding: 1rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .chat-empty {
+    font-style: italic;
+    color: #bbb;
+    font-size: 0.95rem;
+    text-align: center;
+    padding: 0.5rem 0;
+  }
+  .chat-msg { display: flex; flex-direction: column; }
+  .chat-msg.user { align-items: flex-end; }
+  .chat-msg.assistant { align-items: flex-start; }
+  .chat-bubble {
+    max-width: 90%;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    line-height: 1.55;
+  }
+  .chat-msg.user .chat-bubble {
+    background: var(--rust);
+    color: #fff;
+    border-bottom-right-radius: 2px;
+  }
+  .chat-msg.assistant .chat-bubble {
+    background: #f0ebe0;
+    border: 1px solid var(--border);
+    color: var(--ink);
+    border-bottom-left-radius: 2px;
+  }
+  .chat-msg.assistant .chat-bubble em { font-style: italic; color: var(--rust); }
+  .chat-input-row {
+    display: flex;
+    border-top: 1px solid var(--border);
+  }
+  .chat-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 0.85rem 1.2rem;
+    font-family: 'EB Garamond', Georgia, serif;
+    font-size: 1rem;
+    color: var(--ink);
+    outline: none;
+    resize: none;
+    min-height: 48px;
+    max-height: 120px;
+  }
+  .chat-input::placeholder { color: #bbb; font-style: italic; }
+  .chat-send {
+    background: none;
+    border: none;
+    border-left: 1px solid var(--border);
+    padding: 0 1.2rem;
+    cursor: pointer;
+    color: var(--gold);
+    font-size: 1.3rem;
+    transition: color 0.15s, background 0.15s;
+  }
+  .chat-send:hover { background: #f5eed8; color: var(--rust); }
+  .chat-send:disabled { color: #ccc; cursor: default; }
+
+  .popup-word-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .speak-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    width: 32px; height: 32px;
+    cursor: pointer;
+    color: var(--gold);
+    font-size: 1rem;
+    display: flex; align-items: center; justify-content: center;
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
+    flex-shrink: 0;
+  }
+  .speak-btn:hover { color: var(--rust); border-color: var(--rust); background: #fdf5e6; }
+  .speak-btn.speaking { color: var(--rust); border-color: var(--rust); animation: pulse 0.6s infinite alternate; }
+  @keyframes pulse { from { opacity: 1; } to { opacity: 0.4; } }
+    font-style: italic;
+    color: var(--gold);
+  }
+
+  .loading::after {
+    content: '';
+    display: inline-block;
+    width: 16px; height: 16px;
+    border: 2px solid var(--border);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin-left: 0.5rem;
+    vertical-align: middle;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .instruction {
+    text-align: center;
+    font-style: italic;
+    color: #888;
+    font-size: 0.9rem;
+    margin-top: 1.2rem;
+  }
+
+  blockquote {
+    margin: 0.5rem 0 0.5rem 1rem;
+    padding-left: 1rem;
+    border-left: 3px solid var(--border);
+    font-style: italic;
+  }
+</style>
+<script src="https://code.responsivevoice.org/responsivevoice.js?key=FREE"></script>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>Marcos 1:1–3</h1>
+    <p>Nueva Traducción Viviente · Haz clic en cualquier palabra</p>
+  </header>
+
+  <div class="legend">
+    <strong style="font-family:'Cinzel',serif;font-size:0.75rem;letter-spacing:0.05em;color:var(--gold);margin-right:0.4rem;">VERBOS:</strong>
+    <span class="legend-item"><span class="legend-dot dot-present"></span> Presente</span>
+    <span class="legend-item"><span class="legend-dot dot-preterite"></span> Pretérito</span>
+    <span class="legend-item"><span class="legend-dot dot-imperfect"></span> Imperfecto</span>
+    <span class="legend-item"><span class="legend-dot dot-future"></span> Futuro</span>
+    <span class="legend-item"><span class="legend-dot dot-imperative"></span> Imperativo</span>
+  </div>
+
+  <div class="passage" id="passage">
+    <span class="verse-num">1</span>
+    <span class="word other" data-word="Esta">Esta</span>
+    <span class="word verb-present" data-word="es">es</span>
+    <span class="word other" data-word="la">la</span>
+    <span class="word noun" data-word="Buena">Buena</span>
+    <span class="word noun" data-word="Noticia">Noticia</span>
+    <span class="word other" data-word="acerca">acerca</span>
+    <span class="word other" data-word="de">de</span>
+    <span class="word proper-noun" data-word="Jesús">Jesús</span>
+    <span class="word other" data-word="el">el</span>
+    <span class="word proper-noun" data-word="Mesías">Mesías</span>,
+    <span class="word other" data-word="el">el</span>
+    <span class="word noun" data-word="Hijo">Hijo</span>
+    <span class="word other" data-word="de">de</span>
+    <span class="word proper-noun" data-word="Dios">Dios</span>.
+    <span class="word verb-preterite" data-word="Comenzó">Comenzó</span>
+    <span class="verse-num">2</span>
+    <span class="word other" data-word="tal">tal</span>
+    <span class="word other" data-word="como">como</span>
+    <span class="word other" data-word="el">el</span>
+    <span class="word noun" data-word="profeta">profeta</span>
+    <span class="word proper-noun" data-word="Isaías">Isaías</span>
+    <span class="word verb-imperfect" data-word="había escrito">había escrito</span>:
+
+    <blockquote>
+      «<span class="word verb-verb" data-word="Mira">Mira</span>,
+      <span class="word verb-present" data-word="envío">envío</span>
+      <span class="word other" data-word="mi">mi</span>
+      <span class="word noun" data-word="mensajero">mensajero</span>
+      <span class="word other" data-word="delante">delante</span>
+      <span class="word other" data-word="de">de</span>
+      <span class="word other" data-word="ti">ti</span>,
+
+      <span class="word other" data-word="y">y</span>
+      <span class="word other" data-word="él">él</span>
+      <span class="word verb-future" data-word="preparará">preparará</span>
+      <span class="word other" data-word="tu">tu</span>
+      <span class="word noun" data-word="camino">camino</span>.
+
+      <span class="verse-num">3</span>
+      <span class="word verb-present" data-word="Es">Es</span>
+      <span class="word other" data-word="una">una</span>
+      <span class="word noun" data-word="voz">voz</span>
+      <span class="word other" data-word="que">que</span>
+      <span class="word verb-present" data-word="clama">clama</span>
+      <span class="word other" data-word="en">en</span>
+      <span class="word other" data-word="el">el</span>
+      <span class="word noun" data-word="desierto">desierto</span>:
+
+      "<span class="word verb-imperative" data-word="¡Preparen">¡Preparen</span>
+      <span class="word other" data-word="el">el</span>
+      <span class="word noun" data-word="camino">camino</span>
+      <span class="word other" data-word="para">para</span>
+      <span class="word other" data-word="la">la</span>
+      <span class="word noun" data-word="venida">venida</span>
+      <span class="word other" data-word="del">del</span>
+      <span class="word proper-noun" data-word="Señor">Señor</span>!
+      <span class="word verb-imperative" data-word="¡Ábranle">¡Ábranle</span>
+      <span class="word noun" data-word="camino">camino</span>!"»
+    </blockquote>
+  </div>
+
+  <p class="instruction">Toca cualquier palabra para un análisis detallado</p>
+
+  <div class="chat-panel">
+    <div class="chat-header">
+      <span>✦ &nbsp;Pregúntame sobre el español de este pasaje</span>
+      <button class="chat-clear" onclick="clearChat()">Nueva conversación</button>
+    </div>
+    <div class="chat-messages" id="chatMessages">
+      <div class="chat-empty" id="chatEmpty">Ask anything about the Spanish grammar, vocabulary, or translation choices in Marcos 1:1–3</div>
+    </div>
+    <div class="chat-input-row">
+      <textarea class="chat-input" id="chatInput" placeholder="e.g. Why does envío have an accent? What tense is preparará?" rows="1"></textarea>
+      <button class="chat-send" id="chatSend" onclick="sendChat()">➤</button>
+    </div>
+  </div>
+</div>
+
+<!-- Popup -->
+<div class="popup-overlay" id="popupOverlay">
+  <div class="popup" id="popup">
+    <div class="popup-header">
+      <div>
+        <div class="popup-word-row">
+          <div class="popup-word" id="popupWord"></div>
+          <button class="speak-btn" id="speakBtn" title="Escuchar pronunciación" onclick="speakWord()">🔊</button>
+        </div>
+        <div class="popup-pos" id="popupPos"></div>
+      </div>
+      <button class="close-btn" onclick="closePopup()">×</button>
+    </div>
+    <div class="popup-body" id="popupBody">
+      <div class="loading">Analizando</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const WORD_DATA = {
+  "acerca": {
+    pos: "Preposición / locución prepositiva",
+    analysis: "<em>Acerca de</em> means 'about, concerning.' It's a compound preposition — <em>a</em> + <em>cerca</em> (near) — literally 'near to,' evolved to mean 'regarding.' Always used with <em>de</em>: you'll never see <em>acerca</em> alone.",
+    extra: null
+  },
+  "de": {
+    pos: "Preposición",
+    analysis: "The most common Spanish preposition. Core meanings: possession (<em>el libro de Juan</em>), origin (<em>soy de Georgia</em>), material, or part of a compound prep like <em>acerca de</em> or <em>delante de</em>. Translates Greek genitive case.",
+    extra: null
+  },
+  "delante": {
+    pos: "Adverbio / preposición",
+    analysis: "<em>Delante de</em> = 'in front of, before.' Compound: <em>de</em> + <em>lante</em> (from Latin <em>ante</em>, before). The Greek has <em>πρὸ προσώπου σου</em> — literally 'before your face,' a Hebraism meaning 'ahead of you.'",
+    extra: null
+  },
+  "tal": {
+    pos: "Adverbio / adjetivo",
+    analysis: "'Such, so, as.' In <em>tal como</em> = 'just as, exactly as.' Sets up the comparison between the events of Mark 1 and Isaiah's prophecy. A fixed phrase common in biblical quotation formulas.",
+    extra: null
+  },
+  "como": {
+    pos: "Conjunción / adverbio comparativo",
+    analysis: "'As, like, how.' In <em>tal como</em> = 'just as.' Introduces the comparison. Not to be confused with <em>cómo</em> (with accent) which is the question word 'how?'",
+    extra: null
+  },
+  "mi": {
+    pos: "Adjetivo posesivo · 1ª persona singular",
+    analysis: "'My.' No accent — distinguishes it from <em>mí</em> (pronoun, 'me'). <em>Mi mensajero</em> = 'my messenger.' God is the speaker in the quoted prophecy.",
+    extra: null
+  },
+  "tu": {
+    pos: "Adjetivo posesivo · 2ª persona singular",
+    analysis: "'Your.' No accent — distinguishes it from <em>tú</em> (pronoun, 'you'). <em>Tu camino</em> = 'your way.' The 'you' addressed is Jesus, as God speaks through the prophecy.",
+    extra: null
+  },
+  "él": {
+    pos: "Pronombre personal · 3ª persona singular masculino",
+    analysis: "'He.' Subject pronoun. The accent distinguishes it from <em>el</em> (the definite article). Refers to the messenger (John the Baptist) who will prepare the way.",
+    extra: null
+  },
+  "para": {
+    pos: "Preposición",
+    analysis: "'For, in order to.' Indicates purpose or destination. <em>Para la venida del Señor</em> = 'for the coming of the Lord.' Contrasts with <em>por</em> — <em>para</em> points forward to a goal.",
+    extra: null
+  },
+  "una": {
+    pos: "Artículo indefinido · femenino singular",
+    analysis: "'A, an.' Feminine indefinite article. <em>Una voz</em> = 'a voice.' The indefiniteness is intentional — the identity of the voice hasn't been revealed yet in the narrative.",
+    extra: null
+  },
+  "que": {
+    pos: "Pronombre relativo / conjunción",
+    analysis: "'That, which, who.' Here a relative pronoun connecting <em>voz</em> to the verb <em>clama</em>: 'a voice that cries out.' One of the most frequent words in Spanish.",
+    extra: null
+  },
+  "en": {
+    pos: "Preposición",
+    analysis: "'In, on, at.' Indicates location. <em>En el desierto</em> = 'in the wilderness.' Translates Greek <em>ἐν τῇ ἐρήμῳ</em> (en tē erēmō) — same preposition, same meaning.",
+    extra: null
+  },
+  "Esta": {
+    pos: "Pronombre demostrativo",
+    analysis: "Feminine singular demonstrative pronoun. Points to a specific thing nearby — 'this (one).' Agrees in gender and number with <em>Noticia</em> (feminine noun).",
+    extra: null
+  },
+  "es": {
+    pos: "Verbo · Presente · 3ª persona singular",
+    analysis: "<strong>Ser</strong> (to be — permanent/essential). 3rd person singular present: <em>él/ella/ello es</em>. Used here for an essential identity statement, not a temporary state.",
+    conjugations: {
+      verb: "ser",
+      tense: "Presente",
+      rows: [
+        ["yo","soy"],["tú","eres"],["usted / él / ella","es","✓"],
+        ["nosotros","somos"],["ustedes / ellos / ellas","son"]
+      ]
+    }
+  },
+  "Buena Noticia": {
+    pos: "Locución nominal · femenina",
+    analysis: "Translation of Greek <em>εὐαγγέλιον</em> (euangelion) — 'gospel' or 'good news.' <em>Buena</em> (good) modifies <em>Noticia</em> (news/notice). The adjective precedes the noun for emphasis.",
+    extra: null
+  },
+  "Noticia": {
+    pos: "Sustantivo · femenina · singular",
+    analysis: "<em>La noticia</em> — 'the news/notice.' Feminine noun. Plural: <em>las noticias</em>. Translates Greek <em>εὐαγγέλιον</em>. The NTV renders it as 'Buena Noticia' rather than the more traditional <em>evangelio</em>.",
+    extra: null
+  },
+  "Jesús": {
+    pos: "Nombre propio",
+    analysis: "Spanish form of Hebrew <em>יֵשׁוּעַ</em> (Yeshua) meaning 'God saves.' The accent on the final syllable (Jesús) follows Spanish stress rules for names ending in a consonant.",
+    extra: null
+  },
+  "Mesías": {
+    pos: "Nombre propio / título",
+    analysis: "From Hebrew <em>מָשִׁיחַ</em> (Mashiach) — 'anointed one.' Greek: <em>Χριστός</em> (Christos). The accent is required because the word ends in -s and stress falls on the final syllable.",
+    extra: null
+  },
+  "Hijo": {
+    pos: "Sustantivo · masculino · singular",
+    analysis: "'Son.' Masculine noun. Plural: <em>los hijos</em>. In <em>Hijo de Dios</em>, the capital H signals a title, not just a description.",
+    extra: null
+  },
+  "Dios": {
+    pos: "Nombre propio / sustantivo",
+    analysis: "'God.' From Latin <em>Deus</em>. Masculine. Used without an article here (<em>Hijo de Dios</em>, not <em>del Dios</em>) when functioning as a proper name rather than a common noun.",
+    extra: null
+  },
+  "Comenzó": {
+    pos: "Verbo · Pretérito · 3ª persona singular",
+    analysis: "<strong>Comenzar</strong> (to begin). Preterite tense = completed past action. The accent on <em>-ó</em> marks 3rd person singular and distinguishes it from present <em>comienzo</em> (I begin). Note: z→c spelling change in <em>comencé</em>.",
+    conjugations: {
+      verb: "comenzar",
+      tense: "Pretérito indefinido",
+      rows: [
+        ["yo","comencé"],["tú","comenzaste"],["usted / él / ella","comenzó","✓"],
+        ["nosotros","comenzamos"],["ustedes / ellos / ellas","comenzaron"]
+      ]
+    }
+  },
+  "profeta": {
+    pos: "Sustantivo · masculino · singular",
+    analysis: "'Prophet.' From Greek <em>προφήτης</em>. Masculine despite ending in -a (a common exception). Plural: <em>los profetas</em>.",
+    extra: null
+  },
+  "Isaías": {
+    pos: "Nombre propio",
+    analysis: "Hebrew prophet, <em>יְשַׁעְיָהוּ</em> (Yeshayahu) — 'God is salvation.' The Greek text has <em>Ἠσαΐᾳ</em>. The accent on the final syllable is required.",
+    extra: null
+  },
+  "había escrito": {
+    pos: "Verbo · Pluscuamperfecto · 3ª persona singular",
+    analysis: "<strong>Escribir</strong> (to write). Past perfect (pluperfect): <em>había + participio</em>. Indicates an action completed before another past action — Isaiah had already written before the events of Mark 1. <em>Escrito</em> is an irregular past participle.",
+    conjugations: {
+      verb: "escribir (pluscuamperfecto)",
+      tense: "Pluscuamperfecto",
+      rows: [
+        ["yo","había escrito"],["tú","habías escrito"],["usted / él / ella","había escrito","✓"],
+        ["nosotros","habíamos escrito"],["ustedes / ellos / ellas","habían escrito"]
+      ]
+    }
+  },
+  "Mira": {
+    pos: "Verbo · Imperativo · 2ª persona singular",
+    analysis: "<strong>Mirar</strong> (to look/see). Singular imperative — 'Look!' or 'See!' Used here to draw attention, not literally commanding sight. Translates Greek <em>Ἰδοὺ</em> (Idou) — 'Behold!'",
+    conjugations: {
+      verb: "mirar",
+      tense: "Imperativo",
+      rows: [
+        ["tú","mira","✓"],["usted / él / ella","mire"],["nosotros","miremos"],
+        ["ustedes / ellos / ellas","miren"]
+      ]
+    }
+  },
+  "envío": {
+    pos: "Verbo · Presente · 1ª persona singular",
+    analysis: "<strong>Enviar</strong> (to send). The accent on <em>-ío</em> separates the vowels into two syllables (en-VÍ-o), preventing them from blending into a diphthong. Without the accent it would be *envio* — wrong pronunciation.",
+    conjugations: {
+      verb: "enviar",
+      tense: "Presente",
+      rows: [
+        ["yo","envío","✓"],["tú","envías"],["usted / él / ella","envía"],
+        ["nosotros","enviamos"],["ustedes / ellos / ellas","envían"]
+      ]
+    }
+  },
+  "mensajero": {
+    pos: "Sustantivo · masculino · singular",
+    analysis: "'Messenger.' From <em>mensaje</em> (message) + <em>-ero</em> (agent suffix). Translates Greek <em>ἄγγελον</em> (angelos) — the same word used for 'angel.' The Greek is intentionally ambiguous.",
+    extra: null
+  },
+  "preparará": {
+    pos: "Verbo · Futuro · 3ª persona singular",
+    analysis: "<strong>Preparar</strong> (to prepare). Simple future = action that will happen. Formed by adding future endings to the full infinitive: <em>preparar + á</em>. The accent marks the stressed final syllable.",
+    conjugations: {
+      verb: "preparar",
+      tense: "Futuro simple",
+      rows: [
+        ["yo","prepararé"],["tú","prepararás"],["usted / él / ella","preparará","✓"],
+        ["nosotros","prepararemos"],["ustedes / ellos / ellas","prepararán"]
+      ]
+    }
+  },
+  "camino": {
+    pos: "Sustantivo · masculino · singular",
+    analysis: "'Road, way, path.' Masculine. Plural: <em>los caminos</em>. Translates Greek <em>ὁδόν</em> (hodon). Used twice in v.2–3 — first for a personal path ('tu camino'), then for the Lord's way.",
+    extra: null
+  },
+  "Es": {
+    pos: "Verbo · Presente · 3ª persona singular",
+    analysis: "<strong>Ser</strong> (to be). Same form as v.1. Here it introduces the voice: 'It is a voice...' — identifying what the previous prophecy refers to.",
+    conjugations: {
+      verb: "ser",
+      tense: "Presente",
+      rows: [
+        ["yo","soy"],["tú","eres"],["usted / él / ella","es","✓"],
+        ["nosotros","somos"],["ustedes / ellos / ellas","son"]
+      ]
+    }
+  },
+  "voz": {
+    pos: "Sustantivo · femenina · singular",
+    analysis: "'Voice.' Feminine. Plural: <em>las voces</em> (z→c before e). Translates Greek <em>φωνὴ</em> (phōnē).",
+    extra: null
+  },
+  "clama": {
+    pos: "Verbo · Presente · 3ª persona singular",
+    analysis: "<strong>Clamar</strong> (to cry out, shout). Present tense describing ongoing action. Translates Greek <em>βοῶντος</em> (boōntos) — a participle meaning 'the one crying out.'",
+    conjugations: {
+      verb: "clamar",
+      tense: "Presente",
+      rows: [
+        ["yo","clamo"],["tú","clamas"],["usted / él / ella","clama","✓"],
+        ["nosotros","clamamos"],["ustedes / ellos / ellas","claman"]
+      ]
+    }
+  },
+  "desierto": {
+    pos: "Sustantivo · masculino · singular",
+    analysis: "'Desert, wilderness.' Masculine. Translates Greek <em>ἐρήμῳ</em> (erēmō). In the OT context, this is the Judean wilderness where John the Baptist ministered.",
+    extra: null
+  },
+  "Preparen": {
+    pos: "Verbo · Imperativo · 2ª persona plural",
+    analysis: "<strong>Preparar</strong> (to prepare). Plural imperative (ustedes) — 'you all, prepare!' The <em>-en</em> ending signals plural command for <em>-ar</em> verbs. Translates Greek <em>Ἑτοιμάσατε</em> — aorist imperative, also 2nd plural (the <em>-σατε</em> ending mirrors Spanish <em>-en</em> for plural).",
+    conjugations: {
+      verb: "preparar",
+      tense: "Imperativo",
+      rows: [
+        ["tú","prepara"],["usted / él / ella","prepare"],["nosotros","preparemos"],
+        ["ustedes / ellos / ellas","preparen","✓"]
+      ]
+    }
+  },
+  "venida": {
+    pos: "Sustantivo / participio nominalizado · femenina",
+    analysis: "'Coming, arrival.' From the verb <em>venir</em> (to come). The past participle used as a noun: <em>la venida</em> = 'the coming.' Common pattern in Spanish for turning verbs into nouns.",
+    extra: null
+  },
+  "Señor": {
+    pos: "Nombre propio / título",
+    analysis: "'Lord.' Translates Greek <em>κυρίου</em> (kyriou). In the OT quotation (Isaiah 40:3), this referred to YHWH (God). Mark applies it to Jesus — a significant theological claim.",
+    extra: null
+  },
+  "Ábranle": {
+    pos: "Verbo · Imperativo · 2ª persona plural + pronombre",
+    analysis: "<strong>Abrir</strong> (to open) + <em>le</em> (indirect object, 'for him'). Plural imperative: <em>abran</em> + attached pronoun <em>le</em> = <em>ábranle</em>. The accent on <em>á</em> preserves the original stress when the pronoun is attached — without it the stress would shift incorrectly to the second syllable.",
+    conjugations: {
+      verb: "abrir",
+      tense: "Imperativo",
+      rows: [
+        ["tú","abre (ábrele)"],["usted / él / ella","abra (ábrele)"],["nosotros","abramos"],
+        ["ustedes / ellos / ellas","abran (ábranle)","✓"]
+      ]
+    }
+  }
+};
+
+async function analyzeWord(word) {
+  const clean = word.replace(/[¡!¿?«»"",.:]/g, '').trim();
+
+  // Always try Claude first for rich dynamic analysis
+  try {
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "anthropic-dangerous-direct-browser-access": "true"
+      },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 1000,
+        messages: [{
+          role: "user",
+          content: `Analyze the Spanish word or phrase "${clean}" as it appears in Marcos 1:1-3 (NTV, Nueva Traducción Viviente). The student is learning Latin American Spanish.
+
+Return ONLY a JSON object with these fields:
+{
+  "pos": "part of speech + tense/person if verb (in Spanish, e.g. 'Verbo · Pretérito · 3ª persona singular')",
+  "analysis": "2-4 sentence explanation in English. Cover: meaning, grammar details, any accent rules, and Greek/Hebrew background if relevant. Use <em> tags around Spanish or Greek words.",
+  "conjugations": null or {
+    "verb": "infinitive",
+    "tense": "tense name in Spanish",
+    "rows": [["person","form"] or ["person","form","✓"] to mark this exact word]
+  }
+}
+
+CONJUGATION RULES — follow exactly:
+- No vosotros ever
+- Always use exactly these 5 person labels in this order:
+  1. "yo"
+  2. "tú"
+  3. "usted / él / ella"
+  4. "nosotros"
+  5. "ustedes / ellos / ellas"
+- Example rows for hablar present tense:
+  [["yo","hablo"],["tú","hablas"],["usted / él / ella","habla"],["nosotros","hablamos"],["ustedes / ellos / ellas","hablan"]]
+
+Only include conjugations for verbs.
+Return pure JSON only, no markdown backticks.`
+        }]
+      })
+    });
+
+    if (!response.ok) throw new Error('API error');
+    const data = await response.json();
+    const text = data.content.find(b => b.type === 'text')?.text || '{}';
+    const parsed = JSON.parse(text.replace(/```json|```/g, '').trim());
+    if (parsed.pos && parsed.analysis) return parsed;
+    throw new Error('Bad response');
+  } catch(e) {
+    // Fall back to hardcoded data if API unavailable
+    for (const key of Object.keys(WORD_DATA)) {
+      if (key.toLowerCase() === clean.toLowerCase()) {
+        return WORD_DATA[key];
+      }
+    }
+    return {
+      pos: "Palabra",
+      analysis: `Could not analyze "<em>${clean}</em>" — chat unavailable in this context. Try opening in Chrome via the artifact viewer.`,
+      conjugations: null
+    };
+  }
+}
+
+function renderPopup(word, data) {
+  document.getElementById('popupWord').textContent = word.replace(/[¡!]/g, '');
+  document.getElementById('popupPos').textContent = data.pos || '';
+
+  let html = '';
+
+  if (data.analysis) {
+    html += `<div class="popup-section">
+      <h3>Análisis</h3>
+      <p>${data.analysis}</p>
+    </div>`;
+  }
+
+  if (data.conjugations) {
+    const c = data.conjugations;
+    html += `<div class="popup-section">
+      <h3>${c.verb} · ${c.tense}</h3>
+      <table class="conjugation-table">
+        <tr><th>Persona</th><th>Forma</th></tr>
+        ${c.rows.map(r => `<tr class="${r[2] === '✓' ? 'highlight' : ''}">
+          <td>${r[0]}</td><td>${r[1]}</td>
+        </tr>`).join('')}
+      </table>
+    </div>`;
+  }
+
+  document.getElementById('popupBody').innerHTML = html;
+}
+
+let activeWord = null;
+
+document.querySelectorAll('.word').forEach(el => {
+  el.addEventListener('click', async function() {
+    if (activeWord) activeWord.classList.remove('active');
+    activeWord = this;
+    this.classList.add('active');
+
+    const word = this.dataset.word;
+    document.getElementById('popupWord').textContent = word.replace(/[¡!]/g, '');
+    document.getElementById('popupPos').textContent = '';
+    document.getElementById('popupBody').innerHTML = '<div class="loading">Analizando</div>';
+    document.getElementById('popupOverlay').classList.add('visible');
+
+    const data = await analyzeWord(word);
+    renderPopup(word, data);
+  });
+});
+
+function closePopup() {
+  document.getElementById('popupOverlay').classList.remove('visible');
+  if (activeWord) activeWord.classList.remove('active');
+  activeWord = null;
+}
+
+document.getElementById('popupOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closePopup();
+});
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closePopup(); });
+
+// ── Chat ──────────────────────────────────────────────
+const PASSAGE_CONTEXT = `Marcos 1:1-3 (NTV):
+"Esta es la Buena Noticia acerca de Jesús el Mesías, el Hijo de Dios. Comenzó tal como el profeta Isaías había escrito: «Mira, envío mi mensajero delante de ti, y él preparará tu camino. Es una voz que clama en el desierto: ¡Preparen el camino para la venida del Señor! ¡Ábranle camino!»"
+
+Greek (Mark 1:1-3): Ἀρχὴ τοῦ εὐαγγελίου Ἰησοῦ χριστοῦ. Καθὼς γέγραπται ἐν τῷ Ἠσαΐᾳ τῷ προφήτῃ· Ἰδοὺ ἀποστέλλω τὸν ἄγγελόν μου πρὸ προσώπου σου, ὃς κατασκευάσει τὴν ὁδόν σου· φωνὴ βοῶντος ἐν τῇ ἐρήμῳ· Ἑτοιμάσατε τὴν ὁδὸν κυρίου, εὐθείας ποιεῖτε τὰς τρίβους αὐτοῦ.`;
+
+const SYSTEM_PROMPT = `You are a Spanish language tutor helping a student memorize and understand Marcos 1:1-3 from the NTV (Nueva Traducción Viviente). The student is learning Latin American Spanish. All grammar explanations, verb forms, and usage notes should reflect Latin American Spanish conventions — not Spain Spanish. For example, use "ustedes" (not "vosotros") for second person plural, and note any vocabulary or usage differences relevant to Latin America.
+
+The passage is:
+${PASSAGE_CONTEXT}
+
+Keep answers concise (3-6 sentences). Use <em> tags around Spanish or Greek words. When showing verb conjugations, use a simple list. Be encouraging but don't be effusive. Answer in English unless asked otherwise.`;
+
+let chatHistory = [];
+
+function speakWord() {
+  const word = document.getElementById('popupWord').textContent.replace(/[¡!¿?]/g, '').trim();
+  if (!word) return;
+  const btn = document.getElementById('speakBtn');
+  btn.classList.add('speaking');
+
+  window.speechSynthesis.cancel();
+  const utt = new SpeechSynthesisUtterance(word);
+  utt.rate = 0.85;
+
+  const voices = window.speechSynthesis.getVoices();
+
+  // Priority: Latin American > any Spanish > fallback
+  const latinAm = voices.find(v => ['es-MX','es-US','es-CO','es-AR','es-CL','es-PE'].includes(v.lang));
+  const anySpanish = voices.find(v => v.lang.startsWith('es'));
+  const chosen = latinAm || anySpanish;
+
+  if (chosen) {
+    utt.voice = chosen;
+    utt.lang = chosen.lang;
+  } else {
+    utt.lang = 'es-MX';
+  }
+
+  utt.onend = () => btn.classList.remove('speaking');
+  utt.onerror = () => btn.classList.remove('speaking');
+  window.speechSynthesis.speak(utt);
+}
+
+function clearChat() {
+  chatHistory = [];
+  const messages = document.getElementById('chatMessages');
+  messages.innerHTML = `<div class="chat-empty" id="chatEmpty">Ask anything about the Spanish grammar, vocabulary, or translation choices in Marcos 1:1–3</div>`;
+}
+
+async function sendChat() {
+  const input = document.getElementById('chatInput');
+  const question = input.value.trim();
+  if (!question) return;
+
+  input.value = '';
+  input.style.height = 'auto';
+
+  // Remove empty state
+  const empty = document.getElementById('chatEmpty');
+  if (empty) empty.remove();
+
+  const messages = document.getElementById('chatMessages');
+  const send = document.getElementById('chatSend');
+  send.disabled = true;
+
+  // User bubble
+  const userDiv = document.createElement('div');
+  userDiv.className = 'chat-msg user';
+  userDiv.innerHTML = `<div class="chat-bubble">${question}</div>`;
+  messages.appendChild(userDiv);
+
+  // Thinking bubble
+  const thinkDiv = document.createElement('div');
+  thinkDiv.className = 'chat-msg assistant';
+  thinkDiv.innerHTML = `<div class="chat-bubble" style="font-style:italic;color:#aaa">Pensando…</div>`;
+  messages.appendChild(thinkDiv);
+  messages.scrollTop = messages.scrollHeight;
+
+  chatHistory.push({ role: 'user', content: question });
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: SYSTEM_PROMPT,
+        messages: chatHistory
+      })
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(`${response.status}: ${err?.error?.message || response.statusText}`);
+    }
+
+    const data = await response.json();
+    const reply = data.content?.find(b => b.type === 'text')?.text || 'Sorry, I could not get a response.';
+
+    chatHistory.push({ role: 'assistant', content: reply });
+
+    thinkDiv.innerHTML = `<div class="chat-bubble">${reply}</div>`;
+  } catch(e) {
+    thinkDiv.innerHTML = `<div class="chat-bubble" style="color:#999;font-style:italic">Error: ${e.message}</div>`;
+  }
+
+  send.disabled = false;
+  messages.scrollTop = messages.scrollHeight;
+}
+
+// Auto-resize textarea & Enter to send
+document.getElementById('chatInput').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendChat();
+  }
+});
+
+document.getElementById('chatInput').addEventListener('input', function() {
+  this.style.height = 'auto';
+  this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+});
+</script>
+</body>
+</html>

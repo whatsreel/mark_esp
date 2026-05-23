@@ -19,30 +19,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: "3.3"
-          bundler-cache: true
-
-      - name: Build Jekyll
-        run: bundle exec jekyll build
-
       - name: Install staticrypt
         run: npm install -g staticrypt
 
-      - name: Encrypt HTML
+      - name: Prepare and encrypt
         env:
           PASSWORD: ${{ secrets.STATICRYPT_PASSWORD }}
         run: |
-          cp -r _site _encrypted
-          while IFS= read -r f; do
-            dir=$(dirname "$f")
-            staticrypt "$f" -p "$PASSWORD" -d "$dir" --short
-          done < <(find _encrypted -name "*.html")
+          mkdir _site
+          cp index.html _site/index.html
+          staticrypt _site/index.html -p "$PASSWORD" -d _site --short
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: _encrypted
+          path: _site
 
   deploy:
     needs: build
