@@ -874,7 +874,7 @@
       <button class="chat-clear" onclick="clearChat()">Nueva conversación</button>
     </div>
     <div class="chat-messages" id="chatMessages">
-      <div class="chat-empty" id="chatEmpty">Ask anything about the Spanish grammar, vocabulary, or translation choices in Marcos 1:1–15</div>
+      <div class="chat-empty" id="chatEmpty"></div>
     </div>
     <div class="chat-input-row">
       <textarea class="chat-input" id="chatInput" placeholder="e.g. Why does envío have an accent? What tense is preparará?" rows="1"></textarea>
@@ -1359,7 +1359,7 @@ function speakWord() {
 function clearChat() {
   chatHistory = [];
   const messages = document.getElementById('chatMessages');
-  messages.innerHTML = `<div class="chat-empty" id="chatEmpty">Ask anything about the Spanish grammar, vocabulary, or translation choices in Marcos 1:1–15</div>`;
+  messages.innerHTML = `<div class="chat-empty" id="chatEmpty"></div>`;
 }
 
 async function sendChat() {
